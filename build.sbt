@@ -12,7 +12,9 @@ lazy val root = (project in file("."))
   .enablePlugins(DockerPlugin)
   .enablePlugins(EcrPlugin)
 
-libraryDependencies ++= Seq()
+libraryDependencies ++= Seq(
+  guice
+)
 
 scalacOptions ++= Seq(
   "-Xfatal-warnings",
