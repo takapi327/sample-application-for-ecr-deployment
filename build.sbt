@@ -34,7 +34,7 @@ javaOptions ++= Seq(
 )
 
 Universal / javaOptions ++= Seq(
-  "Dpidfile.path=/dev/null"
+  "-Dpidfile.path=/dev/null"
 )
 
 run / fork := true
