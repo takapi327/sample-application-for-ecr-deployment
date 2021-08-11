@@ -70,9 +70,17 @@ Docker / daemonUser         := "daemon"
 import com.amazonaws.regions.{ Region, Regions }
 
 Ecr / region           := Region.getRegion(Regions.AP_NORTHEAST_1)
-Ecr / repositoryName   := "stg-sample-canary-deploy"
-Ecr / repositoryTags   := Seq(version.value, "latest")
 Ecr / localDockerImage := (Docker / packageName).value + ":" + (Docker / version).value
+Ecr / repositoryName   := {
+  //if (master) { "prod-" + (Docker / packageName).value }
+  //else        { "stg-"  + (Docker / packageName).value }
+  if (master) { "prod-sample-canary-deploy" }
+  else        { "stg-sample-canary-deploy" }
+}
+Ecr / repositoryTags   := {
+  if (master) { Seq(version.value, "latest") }
+  else        { Seq(version.value) }
+}
 
 /** Setting sbt-release */
 import ReleaseTransformations._
