@@ -33,24 +33,10 @@ scalacOptions ++= Seq(
   "-Ymacro-annotations"
 )
 
-javaOptions ++= {
-  if (master) {
-    Seq(
-      "-Dconfig.file=conf/env.prod/application.conf",
-      "-Dlogger.file=conf/env.prod/logback.xml"
-    )
-  } else if (staging) {
-    Seq(
-      "-Dconfig.file=conf/env.stg/application.conf",
-      "-Dlogger.file=conf/env.stg/logback.xml"
-    )
-  } else {
-    Seq(
-      "-Dconfig.file=conf/env.dev/application.conf",
-      "-Dlogger.file=conf/env.dev/logback.xml"
-    )
-  }
-}
+javaOptions ++= Seq(
+  "-Dconfig.file=conf/env.dev/application.conf",
+  "-Dlogger.file=conf/env.dev/logback.xml"
+)
 
 Universal / javaOptions ++= Seq(
   "-Dpidfile.path=/dev/null"
@@ -102,7 +88,6 @@ releaseProcess := {
   } else if (staging) {
     Seq[ReleaseStep](
       runClean,
-      inquireVersions,
       ReleaseStep(state => Project.extract(state).runTask(Ecr / login, state)._1),
       ReleaseStep(state => Project.extract(state).runTask(Docker / publishLocal, state)._1),
       ReleaseStep(state => Project.extract(state).runTask(Ecr / push, state)._1),
@@ -110,7 +95,6 @@ releaseProcess := {
   } else {
     Seq[ReleaseStep](
       runClean,
-      inquireVersions,
       ReleaseStep(state => Project.extract(state).runTask(Ecr / login, state)._1),
       ReleaseStep(state => Project.extract(state).runTask(Docker / publishLocal, state)._1),
       ReleaseStep(state => Project.extract(state).runTask(Ecr / push, state)._1),
