@@ -71,15 +71,12 @@ import com.amazonaws.regions.{ Region, Regions }
 
 Ecr / region           := Region.getRegion(Regions.AP_NORTHEAST_1)
 Ecr / localDockerImage := (Docker / packageName).value + ":" + (Docker / version).value
+Ecr / repositoryTags   := Seq(version.value, "latest")
 Ecr / repositoryName   := {
   //if (master) { "prod-" + (Docker / packageName).value }
   //else        { "stg-"  + (Docker / packageName).value }
   if (master) { "prod-sample-canary-deploy" }
   else        { "stg-sample-canary-deploy" }
-}
-Ecr / repositoryTags   := {
-  if (master) { Seq(version.value, "latest") }
-  else        { Seq(version.value) }
 }
 
 /** Setting sbt-release */
@@ -105,6 +102,7 @@ releaseProcess := {
   } else if (staging) {
     Seq[ReleaseStep](
       runClean,
+      inquireVersions,
       ReleaseStep(state => Project.extract(state).runTask(Ecr / login, state)._1),
       ReleaseStep(state => Project.extract(state).runTask(Docker / publishLocal, state)._1),
       ReleaseStep(state => Project.extract(state).runTask(Ecr / push, state)._1),
@@ -112,6 +110,7 @@ releaseProcess := {
   } else {
     Seq[ReleaseStep](
       runClean,
+      inquireVersions,
       ReleaseStep(state => Project.extract(state).runTask(Ecr / login, state)._1),
       ReleaseStep(state => Project.extract(state).runTask(Docker / publishLocal, state)._1),
       ReleaseStep(state => Project.extract(state).runTask(Ecr / push, state)._1),
