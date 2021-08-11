@@ -33,10 +33,6 @@ javaOptions ++= Seq(
   "-Dlogger.file=conf/env.dev/logback.xml"
 )
 
-Universal / javaOptions ++= Seq(
-  "Dpidfile.path=/dev/null"
-)
-
 run / fork := true
 
 /**
