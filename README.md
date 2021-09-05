@@ -18,7 +18,12 @@ AWSインフラ構築時にECRイメージを多用するので、サンプル�
 $ git clone git@github.com:takapi327/sample-application-for-ecr-deployment.git ${your new application name}
 ```
 
-### 2. build.sbtの各所設定を変更(アプリケーション名の変更)
+### 2. gitの管理を解除する
+```bash
+$ rm -rf .git/
+```
+
+### 3. build.sbtの各所設定を変更(アプリケーション名の変更)
 ```
 name := ${your new application name}
 
@@ -31,6 +36,15 @@ Docker / maintainer := ${your new AWS Account mail}
 Ecr / repositoryName := ${your new application name}
 ```
 
-### 3. AWS ECRへプッシュするためのシークレットキーの変更
+### 4. 新しいリポジトリでGit管理を始める
+```bash
+$ git init
+$ git add .
+$ git commit -m "first commit"
+$ git remote add origin git@github.com:${アカウント名}/${リポジトリ名}
+$ git push -u origin master
+```
+
+### 5. AWS ECRへプッシュするためのシークレットキーの変更
 - AWS_ACCESS_KEY_ID
 - AWS_SECRET_ACCESS_KEY
