@@ -15,7 +15,7 @@ AWSインフラ構築時にECRイメージを多用するので、サンプル�
 ## セットアップ手順
 ### 1. 本リポジトリを別名でクローンする。
 ```bash
-$ git@github.com:takapi327/sample-application-for-ecr-deployment.git ${your new application name}
+$ git clone git@github.com:takapi327/sample-application-for-ecr-deployment.git ${your new application name}
 ```
 
 ### 2. build.sbtの各所設定を変更(アプリケーション名の変更)
