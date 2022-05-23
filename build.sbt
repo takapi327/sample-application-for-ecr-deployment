@@ -16,6 +16,11 @@ libraryDependencies ++= Seq(
   guice
 )
 
+import scala.sys.process._
+lazy val branch  = ("git branch".lineStream_!).find(_.head == '*').map(_.drop(2)).getOrElse("")
+lazy val master  = branch == "master"
+lazy val staging = branch.startsWith("staging")
+
 scalacOptions ++= Seq(
   "-Xfatal-warnings",
   "-deprecation",
@@ -51,25 +56,48 @@ Docker / daemonUser         := "daemon"
 import com.amazonaws.regions.{ Region, Regions }
 
 Ecr / region           := Region.getRegion(Regions.AP_NORTHEAST_1)
-Ecr / repositoryName   := "stg-sample-canary-deploy"
-Ecr / repositoryTags   := Seq(version.value, "latest")
 Ecr / localDockerImage := (Docker / packageName).value + ":" + (Docker / version).value
+Ecr / repositoryTags   := Seq(version.value, "latest")
+Ecr / repositoryName   := {
+  //if (master) { "prod-" + (Docker / packageName).value }
+  //else        { "stg-"  + (Docker / packageName).value }
+  if (master) { "prod-sample-canary-deploy" }
+  else        { "stg-sample-canary-deploy" }
+}
 
 /** Setting sbt-release */
 import ReleaseTransformations._
 
 releaseVersionBump := sbtrelease.Version.Bump.Bugfix
 
-releaseProcess := Seq[ReleaseStep](
-  ReleaseStep(state => Project.extract(state).runTask(Ecr / login, state)._1),
-  inquireVersions,
-  runClean,
-  setReleaseVersion,
-  ReleaseStep(state => Project.extract(state).runTask(Docker / publishLocal, state)._1),
-  ReleaseStep(state => Project.extract(state).runTask(Ecr / push, state)._1),
-  commitReleaseVersion,
-  tagRelease,
-  setNextVersion,
-  commitNextVersion,
-  pushChanges
-)
+releaseProcess := {
+  if (master) {
+    Seq[ReleaseStep](
+      ReleaseStep(state => Project.extract(state).runTask(Ecr / login, state)._1),
+      inquireVersions,
+      runClean,
+      setReleaseVersion,
+      ReleaseStep(state => Project.extract(state).runTask(Docker / publishLocal, state)._1),
+      ReleaseStep(state => Project.extract(state).runTask(Ecr / push, state)._1),
+      commitReleaseVersion,
+      tagRelease,
+      setNextVersion,
+      commitNextVersion,
+      pushChanges
+    )
+  } else if (staging) {
+    Seq[ReleaseStep](
+      runClean,
+      ReleaseStep(state => Project.extract(state).runTask(Ecr / login, state)._1),
+      ReleaseStep(state => Project.extract(state).runTask(Docker / publishLocal, state)._1),
+      ReleaseStep(state => Project.extract(state).runTask(Ecr / push, state)._1),
+    )
+  } else {
+    Seq[ReleaseStep](
+      runClean,
+      ReleaseStep(state => Project.extract(state).runTask(Ecr / login, state)._1),
+      ReleaseStep(state => Project.extract(state).runTask(Docker / publishLocal, state)._1),
+      ReleaseStep(state => Project.extract(state).runTask(Ecr / push, state)._1),
+    )
+  }
+}
